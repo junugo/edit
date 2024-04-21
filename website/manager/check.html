@@ -12,8 +12,53 @@
       .all {
         display: flex;
         flex-direction: column;
+        overflow-x: auto;
       }
     </style>
+    <style>.checkbox-wrapper input[type="checkbox"] {
+      visibility: hidden;
+      display: none;
+    }
+    
+    .checkbox-wrapper *,
+      .checkbox-wrapper ::after,
+      .checkbox-wrapper ::before {
+      box-sizing: border-box;
+      user-select: none;
+    }
+    
+    .checkbox-wrapper {
+      position: relative;
+      display: block;
+      overflow: hidden;
+    }
+    
+    .checkbox-wrapper .label {
+      cursor: pointer;
+    }
+    
+    .checkbox-wrapper .check {
+      width: 50px;
+      height: 50px;
+      position: absolute;
+      opacity: 0;
+    }
+    
+    .checkbox-wrapper .label svg {
+      vertical-align: middle;
+    }
+    
+    .checkbox-wrapper .path1 {
+      stroke-dasharray: 400;
+      stroke-dashoffset: 400;
+      transition: .5s stroke-dashoffset;
+      opacity: 0;
+    }
+    
+    .checkbox-wrapper .check:checked + label svg g path {
+      stroke-dashoffset: 0;
+      opacity: 1;
+    }</style>
   </head>
   <body>
     <div class="all">
@@ -23,6 +68,7 @@
         <input type="submit" id="submit" value="开始检录" />
       </div>
       <table id="myTable" border="1"></table>
+      <div class="blank-space" style="height: 100vh;"><br><br><br><br><br></div>
     </div>
   </body>
   <script>
@@ -55,31 +101,47 @@
         fetch(`/api/find_event/${event_name}`)
           .then((response) => response.json())
           .then((data) => {
-            // 假设你的JSON数据如下
-            var jsonList =data;
+            console.info(data)
 
             // 将JSON数据解析为JavaScript对象
-            var list = JSON.parse(jsonList);
+            var list = data;
 
             // 创建表头
             var header = document.createElement("tr");
             var th1 = document.createElement("th");
             th1.innerHTML = "班级";
             var th2 = document.createElement("th");
-            th2.innerHTML = "年龄";
+            th2.innerHTML = "名字";
+            var th3 = document.createElement("th");
+            th3.innerHTML = "签到";
             header.appendChild(th1);
             header.appendChild(th2);
+            header.appendChild(th3);
             document.getElementById("myTable").appendChild(header);
 
             // 遍历列表项，将它们添加到表格中
             for (var i = 0; i < list.length; i++) {
+              console.info(list[i])
               var row = document.createElement("tr");
               var td1 = document.createElement("td");
-              td1.innerHTML = list[i].class;
+              td1.innerHTML = list[i].Class;
               var td2 = document.createElement("td");
-              td2.innerHTML = list[i].name;
+              td2.innerHTML = list[i].Name;
+              var td3 = document.createElement("td");
+              if (list[i].Status == "未比赛") {
+                td3.innerHTML = "待签到";
+                const button = document.createElement('button');
+                button.textContent = "立即签到";
+                button.onclick = function() {
+                    alert("乐"+i);
+                }
+                td3.appendChild(button);
+              } else {
+                td3.innerHTML = "已检录";
+              }
               row.appendChild(td1);
               row.appendChild(td2);
+              row.appendChild(td3);
               document.getElementById("myTable").appendChild(row);
             }
           })
