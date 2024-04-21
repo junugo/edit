@@ -6,6 +6,7 @@ from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 import data_manager
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
+import json
 
 app = FastAPI()
 data_manager = data_manager.data_manager()
@@ -46,7 +47,9 @@ async def manager(page_name: str):
 
 @app.get("/api/manager_page")
 async def manager_page():
-    return [{"Name": "参赛", "Address": "./join"}]
+    return [{"Name": "参赛", "Address": "./join"},
+            {"Name": "检录", "Address": "./check"},
+            ]
 
 
 @app.get("/api/all_class")
@@ -76,6 +79,10 @@ async def quickly_join(file: bytes = File(...)):
     for student in data_list:
         data_manager.join(str(student[0]), str(student[1]), str(student[2]))
     return "File uploaded successfully."
+
+@app.get("/api/find_event/{event}")
+async def find_event(event:str):
+    return data_manager.basics.find_event(event)
 
 @app.get("/{page_name}", response_class=HTMLResponse)
 async def main(page_name: str):

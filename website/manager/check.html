@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <script src="lottie5_12_2_min.js"></script>
+    <script src="/manager/managerMenu.js"></script>
+    <title>核能运动会操作系统</title>
+    <style>
+      #event {
+        width: 50vh;
+      }
+      .all {
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="all">
+      <div class="choose">
+        <label for="event">项目:</label>
+        <select id="event" name="event"></select>
+        <input type="submit" id="submit" value="开始检录" />
+      </div>
+      <table id="myTable" border="1"></table>
+    </div>
+  </body>
+  <script>
+    All_Things_I_Should_do();
+  </script>
+  <script>
+    const chose_event = document.getElementById("event");
+    fetch("/api/all_event")
+      .then((response) => response.json())
+      .then((data) => {
+        const param1Options = data;
+        console.info(param1Options);
+        for (let i = 0; i < param1Options.length; i++) {
+          const option = param1Options[i];
+          const opt = document.createElement("option");
+          opt.textContent = option;
+          chose_event.appendChild(opt);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+
+    document
+      .getElementById("submit")
+      .addEventListener("click", function (event) {
+        event.preventDefault();
+
+        const event_name = document.getElementById("event").value;
+
+        // 这里你可以使用AJAX或其他方法发送参数到API
+        fetch(`/api/find_event/${event_name}`)
+          .then((response) => response.json())
+          .then((data) => {
+            // 假设你的JSON数据如下
+            var jsonList =data;
+
+            // 将JSON数据解析为JavaScript对象
+            var list = JSON.parse(jsonList);
+
+            // 创建表头
+            var header = document.createElement("tr");
+            var th1 = document.createElement("th");
+            th1.innerHTML = "班级";
+            var th2 = document.createElement("th");
+            th2.innerHTML = "年龄";
+            header.appendChild(th1);
+            header.appendChild(th2);
+            document.getElementById("myTable").appendChild(header);
+
+            // 遍历列表项，将它们添加到表格中
+            for (var i = 0; i < list.length; i++) {
+              var row = document.createElement("tr");
+              var td1 = document.createElement("td");
+              td1.innerHTML = list[i].class;
+              var td2 = document.createElement("td");
+              td2.innerHTML = list[i].name;
+              row.appendChild(td1);
+              row.appendChild(td2);
+              document.getElementById("myTable").appendChild(row);
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      });
+  </script>
+</html>
