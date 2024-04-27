@@ -91,6 +91,7 @@ function All_Things_I_Should_do() {
 
         // 将新创建的button元素添加到页面中
         rightMenu.appendChild(newButton);
+        rightMenu.innerHTML+="<br>"
       });
     })
     .catch((error) => {

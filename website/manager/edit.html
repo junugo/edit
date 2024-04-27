@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <script src="lottie5_12_2_min.js"></script>
+  <script src="/manager/managerMenu.js"></script>
+  <title>核能运动会操作系统</title>
+  <style>
+    .tab-button {
+      cursor: pointer;
+      padding: 10px 15px;
+      margin: 0;
+      border: none;
+      background-color: #f2f2f2;
+      border-bottom: 2px solid #ccc;
+    }
+
+    .tab-button.active {
+      background-color: #ddd;
+    }
+
+    .tab-content {
+      display: none;
+      padding: 10px;
+      border-top: 1px solid #ccc;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .all {
+      flex-direction: column;
+    }
+
+    #event {
+      width: 40vw;
+    }
+
+    #martch {
+      width: 40vw;
+    }
+
+    .all {
+      display: flex;
+      flex-direction: column;
+      overflow-x: auto;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="all">
+    <div class="tabs">
+      <button class="tab-button active" onclick="switchTab(0)">
+        按项目
+      </button>
+      <button class="tab-button" onclick="switchTab(1)">按场次</button>
+      <div class="tab-content active">
+        <select id="event" name="event"></select>
+        <button type="submit" id="submit">载入项目</button>
+      </div>
+      <div class="tab-content">
+        <select id="martch" name="martch"></select>
+        <button type="submit" id="submit">载入场次</button>
+      </div>
+    </div>
+    <button id="update">上传表格</button>
+    <table id="myTable" border="1"></table>
+    <div class="blank-space" style="height: 100vh;"><br><br><br><br><br></div>
+  </div>
+</body>
+<script>
+  All_Things_I_Should_do();
+</script>
+<script>
+  function switchTab(index) {
+    const buttons = document.querySelectorAll(".tab-button");
+    const contents = document.querySelectorAll(".tab-content");
+
+    buttons.forEach((button, idx) => {
+      button.classList.remove("active");
+      contents[idx].classList.remove("active");
+    });
+
+    buttons[index].classList.add("active");
+    contents[index].classList.add("active");
+  }
+  const chose_event = document.getElementById("event");
+  fetch("/api/all_event")
+    .then((response) => response.json())
+    .then((data) => {
+      const param1Options = data;
+      console.info(param1Options);
+      for (let i = 0; i < param1Options.length; i++) {
+        const option = param1Options[i];
+        const opt = document.createElement("option");
+        opt.textContent = option;
+        chose_event.appendChild(opt);
+      }
+    })
+    .catch((error) => console.error("Error:", error));
+  var EveryThing
+  function getdata() {
+    const event_name = document.getElementById("event").value;
+    document.getElementById("myTable").innerHTML = ""
+
+    // 这里你可以使用AJAX或其他方法发送参数到API
+    fetch(`/api/find_event/${event_name}`)
+      .then((response) => response.json())
+      .then((data) => {
+        console.info(data)
+
+        // 将JSON数据解析为JavaScript对象
+        var list = data;
+        var EveryThing=[];
+
+        // 创建表头
+        var header = document.createElement("tr");
+        var th1 = document.createElement("th");
+        th1.innerHTML = "班级";
+        var th2 = document.createElement("th");
+        th2.innerHTML = "名字";
+        var th3 = document.createElement("th");
+        th3.innerHTML = "场次";
+        var th4 = document.createElement("th");
+        th4.innerHTML = "状态";
+        var th5 = document.createElement("th");
+        th5.innerHTML = "成绩";
+        var th6 = document.createElement("th");
+        th6.innerHTML = "分数";
+        header.appendChild(th1);
+        header.appendChild(th2);
+        header.appendChild(th3);
+        header.appendChild(th4);
+        header.appendChild(th5);
+        header.appendChild(th6);
+        document.getElementById("myTable").appendChild(header);
+
+        // 遍历列表项，将它们添加到表格中
+        for (let i = 0; i < list.length; i++) {
+          console.info(list[i])
+          EveryThing[i]={}
+          var row = document.createElement("tr");
+          var td1 = document.createElement("td");
+          td1.innerHTML = list[i].Class;
+          var td2 = document.createElement("td");
+          td2.innerHTML = list[i].Name;
+          var td3 = document.createElement("td");
+          td3.innerHTML = list[i].Match;
+          var td4 = document.createElement("td");
+          EveryThing[i].Status= document.createElement("input");
+          td4.appendChild(EveryThing[i].Status)
+          EveryThing[i].Status.value=list[i].Status
+          var td5 = document.createElement("td");
+          EveryThing[i].Result= document.createElement("input");
+          td5.appendChild(EveryThing[i].Result)
+          EveryThing[i].Result.value=list[i].Result
+          var td6 = document.createElement("td");
+          EveryThing[i].Score= document.createElement("input");
+          td6.appendChild(EveryThing[i].Score)
+          EveryThing[i].Score.value=list[i].Score
+          row.appendChild(td1);
+          row.appendChild(td2);
+          row.appendChild(td3);
+          row.appendChild(td4);
+          row.appendChild(td5);
+          row.appendChild(td6);
+          document.getElementById("myTable").appendChild(row);
+        }
+      })
+      .catch((error) => console.error("Error:", error));
+  };
+  function update(){
+    for (let i = 0; i < list.length; i++) {
+      list[i].Result=EveryThing[i].Result.value
+      list[i].Score=EveryThing[i].Score.value
+    }
+  }
+  document
+    .getElementById("submit")
+    .addEventListener("click", function (event) {
+      event.preventDefault();
+      getdata()
+    })</script>
+
+</html>

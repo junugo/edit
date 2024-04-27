@@ -49,6 +49,8 @@ async def manager(page_name: str):
 async def manager_page():
     return [{"Name": "参赛", "Address": "./join"},
             {"Name": "检录", "Address": "./check"},
+            {"Name": "记录", "Address": "./record"},
+            {"Name": "修改", "Address": "./edit"},
             ]
 
 
@@ -83,6 +85,15 @@ async def quickly_join(file: bytes = File(...)):
 @app.get("/api/find_event/{event}")
 async def find_event(event:str):
     return data_manager.basics.find_event(event)
+
+@app.get("/api/check/{class_name}/{name}/{event}")
+async def check(class_name:str,name:str,event:str):
+    data_manager.check_in(class_name,name,event)
+
+# @app.get("/api/{class_name}/{name}/{event}")
+# async def check(class_name:str,name:str,event:str):
+#     data_manager.check_in(class_name,name,event)
+
 
 @app.get("/{page_name}", response_class=HTMLResponse)
 async def main(page_name: str):

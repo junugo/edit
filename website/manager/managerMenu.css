@@ -88,6 +88,9 @@ p {
     background-color: hsl(115, 55%, 55%);
 }
 
+.rightMenu{
+    flex-direction: column;
+}
 .To {
     border: none;
     width: 100%;
