@@ -1,5 +1,4 @@
-
-![icon](https://github.com/junugo/Nuclear-sports-games-system/assets/115913410/99c6c99d-2261-464f-8fe0-826fd159b10a)
+![icon](https://github.com/junugo/Nuclear-sports-games-system/assets/115913410/f37cf68f-dff4-476f-bd1f-a7113c631dff)
 
 # 核能运动会操作系统
 # Nuclear-sports-games-system
