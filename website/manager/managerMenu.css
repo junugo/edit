@@ -82,20 +82,21 @@ p {
     display: flex;
     transition: right 0.5s cubic-bezier(0.15, 0.75, 1, 1);
     /* 添加缓动效果 */
+    text-align: center;
 }
 
 #fly.hidden .toggle-btn {
     background-color: hsl(115, 55%, 55%);
 }
 
-.rightMenu{
+.rightMenu {
     flex-direction: column;
 }
+
 .To {
     border: none;
     width: 100%;
     background-color: unset;
-    text-align: left;
     font-size: 5vh;
     margin: 4px 2px;
     cursor: pointer;
@@ -560,7 +561,7 @@ p {
 .my_card h2 {
     z-index: 1;
     color: white;
-    font-size: 5vh;
+    font-size: 3vw;
 }
 
 .my_card::before {
@@ -597,7 +598,7 @@ p {
     animation: rotBGimg 3.5s linear infinite;
   } */
 
-  .message {
+.message {
     position: fixed;
     top: 20px;
     right: 20px;
@@ -619,8 +620,8 @@ p {
     border: 1px solid rgba(255, 255, 255, 0.18);
     height: 100vh;
     top: 10vh;
-    left: 25vh;
-    right: 25vh;
+    left: 10vw;
+    right: 10vw;
     position: fixed;
     display: flex;
 }

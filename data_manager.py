@@ -4,6 +4,7 @@ import json
 import time
 import shutil
 
+
 class data_manager:
     def __init__(self):
         class basics:
@@ -11,17 +12,61 @@ class data_manager:
                 self.class_path = "data/class"
                 self.event_path = "data/event"
                 self.match_path = "data/match"
+                self.class_data = "data/ClassData.json"
+                self.event_data = "data/EventData.json"
                 if not os.path.exists(self.class_path):
                     os.makedirs(self.class_path)
                 if not os.path.exists(self.event_path):
                     os.makedirs(self.event_path)
                 if not os.path.exists(self.match_path):
                     os.makedirs(self.match_path)
+                if not os.path.exists(self.class_data):
+                    with open(self.class_data, 'w') as file:
+                        json.dump({}, file)
+                if not os.path.exists(self.event_data):
+                    with open(self.event_data, 'w') as file:
+                        json.dump({}, file)
+
+            def find_class_data(self):
+                with open(self.class_data, 'r') as file:
+                    data = json.load(file)
+                return data
+
+            def save_class_data(self, data):
+                with open(self.class_data, 'w') as file:
+                    json.dump(data, file, indent=4)
+
+            def create_class(self, class_name: str, grade: str):
+                path = f"{self.class_path}/{class_name}.csv"
+                headers = ["Name", "Event1", "Event2"]
+                with open(path, 'w', newline='') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=headers)
+                    writer.writeheader()  # 写入表头
+                data = self.find_class_data()
+                data[class_name] = grade
+                self.save_class_data(data)
+
+            def create_event(self, event_name: str, grade: str, big_event: str, type: str):
+                path1 = f"{self.event_path}/{event_name}.csv"
+                headers = ["Class", "Name", "Match", "Status", "Result", "Score"]
+                with open(path1, 'w', newline='') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=headers)
+                    writer.writeheader()  # 写入表头
+                path2 = f"{self.event_path}/{event_name}.json"
+                data = {"grade": grade, "big_event": big_event, "type": type}
+                with open(path2, 'w') as file:
+                    json.dump(data, file, indent=4)
+
+            def about_event(self,event:str):
+                path = f"{self.event_path}/{event}.json"
+                with open(path, 'r') as file:
+                    data = json.load(file)
+                return data
 
             def find_class(self, class_name: str):
                 path = f"{self.class_path}/{class_name}.csv"
-                if not os.path.exists(path):
-                    return []
+                # if not os.path.exists(path):
+                #    return []
                 ClassData = []
                 with open(path, 'r', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)
@@ -40,8 +85,8 @@ class data_manager:
 
             def find_event(self, event_name: str):
                 path = f"{self.event_path}/{event_name}.csv"
-                if not os.path.exists(path):
-                    return []
+                # if not os.path.exists(path):
+                #    return []
                 EventData = []
                 with open(path, 'r', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)
@@ -53,7 +98,7 @@ class data_manager:
                 path = f"{self.event_path}/{event_name}.csv"
                 headers = ["Class", "Name", "Match", "Status", "Result", "Score"]
                 clear_data = sorted(data, key=lambda x: (
-                x['Class'], x['Name'], int(x['Match']), x['Status'], int(x['Score'])))
+                    x['Class'], x['Name'], int(x['Match']), x['Status'], int(x['Score'])))
                 with open(path, 'w', newline='') as csvfile:
                     writer = csv.DictWriter(csvfile, fieldnames=headers)
                     writer.writeheader()  # 写入表头
@@ -61,8 +106,8 @@ class data_manager:
 
             def find_match(self, match_name: str):
                 path = f"{self.match_path}/{match_name}.csv"
-                if not os.path.exists(path):
-                    return []
+                # if not os.path.exists(path):
+                #    return []
                 MatchData = []
                 with open(path, 'r', newline='') as csvfile:
                     reader = csv.DictReader(csvfile)
@@ -172,7 +217,7 @@ class data_manager:
                 data["Status"] = "待比赛"
         self.basics.save_event(event, event_data)
 
-    def record(self, class_name,student_name,event,result):
+    def record_result(self, class_name, student_name, event, result):
         event_data = self.basics.find_event(event)
         for data in event_data:
             if data["Class"] == class_name and data["Name"] == student_name:
@@ -181,10 +226,36 @@ class data_manager:
                 data["Result"] = result
         self.basics.save_event(event, event_data)
 
+    def record_score(self, class_name, student_name, event, score):
+        event_data = self.basics.find_event(event)
+        for data in event_data:
+            if data["Class"] == class_name and data["Name"] == student_name:
+                if data["Status"] != "待比赛":
+                    return "学生状态错误"
+                data["Score"] = score
+        self.basics.save_event(event, event_data)
+
+    def record_all(self, class_name, student_name, event, status, result, score):
+        event_data = self.basics.find_event(event)
+        for data in event_data:
+            if data["Class"] == class_name and data["Name"] == student_name:
+                data["Status"] = status
+                data["Result"] = result
+                data["Score"] = score
+        self.basics.save_event(event, event_data)
+
+    def find_student(self,event,class_name,name):
+        event_data = self.basics.find_event(event)
+        for data in event_data:
+            if data["Class"] == class_name and data["Name"] == name:
+                return data
+
+
 def fire():
     shutil.rmtree("data")
     time.sleep(1)
     os.makedirs("data")
+
 
 if __name__ == "__main__":
     fire()
@@ -196,6 +267,25 @@ if __name__ == "__main__":
     # print(data_manager.join(912, "JUNU", "九年级男子实心球"))
     # data_manager.check_in(912, "JUNU", "九年级男子实心球")
     # print(data_manager.basics.find_event("九年级男子实心球"))
-    for i in range(100):
-        data_manager.join("912", str(i), "九年级男子实心球")
-    a = data_manager.divide_match("九年级男子实心球", 9)
+
+    # for i in range(100):
+    #    data_manager.join("912", str(i), "九年级男子实心球")
+    # a = data_manager.divide_match("九年级男子实心球", 9)
+
+    for i in range(701, 710 + 1):
+        data_manager.basics.create_class(str(i), "七年级")
+    for i in range(801, 812 + 1):
+        data_manager.basics.create_class(str(i), "八年级")
+    for i in range(901, 913 + 1):
+        data_manager.basics.create_class(str(i), "九年级")
+
+    all1 = ["5KG铅球", "10KG铅球"]
+    all2 = ["100米", "400米", "800米", "1000米", "1500米", "4x100米"]
+    for i in all1:
+        for j in ["七", "八", "九"]:
+            data_manager.basics.create_event(f"{j}年级男子{i}", f"{j}年级", i, "田赛")
+            data_manager.basics.create_event(f"{j}年级女子{i}", f"{j}年级", i, "田赛")
+    for i in all2:
+        for j in ["七", "八", "九"]:
+            data_manager.basics.create_event(f"{j}年级男子{i}", f"{j}年级", i, "径赛")
+            data_manager.basics.create_event(f"{j}年级女子{i}", f"{j}年级", i, "径赛")
