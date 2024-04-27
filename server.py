@@ -1,15 +1,15 @@
 import os
+import uuid
+from typing import List
 
+import pandas as pd
 import uvicorn
-from fastapi import FastAPI, Request, File
+from fastapi import FastAPI, File
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+
 import data_manager
 import excel_maker
-from fastapi.middleware.cors import CORSMiddleware
-import pandas as pd
-import json
-from typing import List
-import uuid
 
 app = FastAPI()
 data_manager = data_manager.data_manager()
@@ -81,21 +81,23 @@ async def all_class():
 
 @app.get("/api/all_grade")
 async def all_grade():
-    grade=[]
-    all_class=data_manager.basics.all_class()
-    data=data_manager.basics.find_class_data()
+    grade = []
+    all_class = data_manager.basics.all_class()
+    data = data_manager.basics.find_class_data()
     for i in all_class:
         if data[i] not in grade:
             grade.append(data[i])
     return grade
 
+
 @app.get("/api/join/{class_name}/{name}/{event}")
 async def join(class_name: str, name: str, event: str):
     return data_manager.join(class_name, name, event)
 
+
 @app.post("/api/quickly_join")
 async def quickly_join(file: bytes = File(...)):
-    path="Temp/up.xlsx"
+    path = "Temp/up.xlsx"
     with open(path, "wb") as f:
         f.write(file)
     # 读取 Excel 文件
@@ -107,57 +109,66 @@ async def quickly_join(file: bytes = File(...)):
         data_manager.join(str(student[0]), str(student[1]), str(student[2]))
     return "File uploaded successfully."
 
+
 @app.get("/api/find_event/{event}")
-async def find_event(event:str):
+async def find_event(event: str):
     return data_manager.basics.find_event(event)
 
+
 @app.get("/api/find_class/{class_name}")
-async def find_class(class_name:str):
-    data=data_manager.basics.find_class(class_name)
-    out=[]
+async def find_class(class_name: str):
+    data = data_manager.basics.find_class(class_name)
+    out = []
     for student in data:
-        my_data=data_manager.find_student(student["Event1"],class_name,student["Name"])
-        out.append({"Class":class_name,"Name":student["Name"],"Event":student["Event1"],"Match":my_data["Match"],"Status":my_data["Status"],"Result":my_data["Result"],"Score":my_data["Score"]})
-        if student["Event2"]!="":
-            my_data=data_manager.find_student(student["Event2"],class_name,student["Name"])
-            out.append({"Class":class_name,"Name":student["Name"],"Event":student["Event2"],"Result":my_data["Result"],"Score":my_data["Score"]})
+        my_data = data_manager.find_student(student["Event1"], class_name, student["Name"])
+        out.append({"Class": class_name, "Name": student["Name"], "Event": student["Event1"], "Match": my_data["Match"],
+                    "Status": my_data["Status"], "Result": my_data["Result"], "Score": my_data["Score"]})
+        if student["Event2"] != "":
+            my_data = data_manager.find_student(student["Event2"], class_name, student["Name"])
+            out.append(
+                {"Class": class_name, "Name": student["Name"], "Event": student["Event2"], "Result": my_data["Result"],
+                 "Score": my_data["Score"]})
     return out
 
+
 @app.get("/api/event_type/{event}")
-async def event_type(event:str):
+async def event_type(event: str):
     return data_manager.basics.about_event(event)["type"]
 
 
 @app.get("/api/check/{class_name}/{name}/{event}")
-async def check(class_name:str,name:str,event:str):
-    data_manager.check_in(class_name,name,event)
+async def check(class_name: str, name: str, event: str):
+    data_manager.check_in(class_name, name, event)
+
 
 # @app.get("/api/{class_name}/{name}/{event}")
 # async def check(class_name:str,name:str,event:str):
 #     data_manager.check_in(class_name,name,event)
 
 @app.post("/api/update_event/{event}")
-async def create_item(event:str,item:List[dict]):
+async def create_item(event: str, item: List[dict]):
     for student in item:
-        data_manager.record_all(student["Class"],student["Name"],event,student["Status"],student["Result"],student["Score"])
+        data_manager.record_all(student["Class"], student["Name"], event, student["Status"], student["Result"],
+                                student["Score"])
+
 
 @app.get("/api/query_event/{event}")
-async def query_event(event:str):
+async def query_event(event: str):
     uuid_str = uuid.uuid4()
-    path=f"Temp/{uuid_str}.xlsx"
-    data=await find_event(event)
-    top=["Class","Name","Match","Result","Score"]
-    Export.export_excel(data,path,top)
+    path = f"Temp/{uuid_str}.xlsx"
+    data = await find_event(event)
+    top = ["Class", "Name", "Match", "Result", "Score"]
+    Export.export_excel(data, path, top)
     return FileResponse(path)
 
 
 @app.get("/api/query_class/{class_name}")
-async def query_class(class_name:str):
+async def query_class(class_name: str):
     uuid_str = uuid.uuid4()
-    path=f"Temp/{uuid_str}.xlsx"
-    data=await find_class(class_name)
-    top=["Class","Name","Match","Result","Score"]
-    Export.export_excel(data,path,top)
+    path = f"Temp/{uuid_str}.xlsx"
+    data = await find_class(class_name)
+    top = ["Class", "Name", "Match", "Result", "Score"]
+    Export.export_excel(data, path, top)
     return FileResponse(path)
 
 

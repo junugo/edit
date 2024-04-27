@@ -1,4 +1,4 @@
-Temp/
-data/
-rubbish/
+/Temp/*
+/data/*
+/rubbish/*
 .venv
