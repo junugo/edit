@@ -1,4 +1,4 @@
-![icon](https://github.com/junugo/Nuclear-sports-games-system/blob/master/icon.svg)
+![icon](https://github.com/junugo/Nuclear-sports-games-system/raw/master/Non-development%20file/icon.svg)
 
 # 核能运动会操作系统
 # Nuclear-sports-games-system
@@ -12,7 +12,7 @@
 - [ ] 高度自定义配置
 
 ---
-您可能需要 [更新日志](https://github.com/junugo/Nuclear-sports-games-system/Non-development%20file/Update%20log.md) [架构图](https://github.com/junugo/Nuclear-sports-games-system/Non-development%20file/核能运动会操作系统总架构.svg)
+您可能需要 [更新日志](https://github.com/junugo/Nuclear-sports-games-system/blob/master/Non-development%20file/Update%20log.md) [架构图](https://github.com/junugo/Nuclear-sports-games-system/blob/master/Non-development%20file/%E6%A0%B8%E8%83%BD%E8%BF%90%E5%8A%A8%E4%BC%9A%E6%93%8D%E4%BD%9C%E7%B3%BB%E7%BB%9F%E6%80%BB%E6%9E%B6%E6%9E%84.svg)
 
 ---
 ## 安装
