@@ -47,7 +47,7 @@ for i in range(4):
         draw.text((num_left + cell_width * j + num_spacing, num_top + border_width + i * cell_height), num, font=font, fill="black")
 
 # 保存图像
-table_image.save('resource/blank4x9.png')
+table_image.save('blank4x9.png')
 
 # 显示图像
 table_image.show()
