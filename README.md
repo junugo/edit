@@ -3,7 +3,7 @@
 # 这个版本已经不再为更新版本，请打开 master 分支！
 # 这个版本已经不再为更新版本，请打开 master 分支！
 
-![icon](https://github.com/junugo/Nuclear-sports-games-system/blob/master/icon.svg)
+![icon](https://github.com/junugo/Nuclear-sports-games-system/raw/Old-version/Non-development%20file/icon.svg)
 
 # 核能运动会操作系统
 # Nuclear-sports-games-system
