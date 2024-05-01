@@ -1,161 +1,145 @@
-import os.path
 import csv
 import json
-import time
+import os.path
 import shutil
+import time
+
+def ff(func):
+    def wrapper(*args, **kwargs):
+        expected_types = func.__annotations__
+
+        # 处理普通参数
+        new_args = []
+        for i, (arg, expected_type) in enumerate(zip(args[1:], expected_types.values())):  # 跳过 'self' 参数
+            if not isinstance(arg, expected_type):
+                arg = expected_type(arg)
+            new_args.append(arg)
+
+        # 处理关键字参数
+        new_kwargs = {}
+        for key, value in kwargs.items():
+            expected_type = expected_types[key]
+            if not isinstance(value, expected_type):
+                value = expected_type(value)
+            new_kwargs[key] = value
+
+        # 调用原始函数
+        return func(args[0], *new_args, **new_kwargs)
+
+    return wrapper
+
+format=True
+def wj(JsonName: str, data: dict):  # write json
+    # 将数据写入JSON文件
+    with open(JsonName, "w") as write_file:
+        if format: json.dump(data, write_file, indent=4)
+        else: json.dump(data, write_file)
+
+
+def rj(JsonName: str):  # read json
+    with open(JsonName, "r") as read_file:
+        loaded_data = json.load(read_file)
+    return loaded_data
+
+
+def wc(CsvName: str, data: list):
+    # 打开一个CSV文件用于写入
+    with open(CsvName, "w", newline='') as write_file:
+        writer = csv.writer(write_file)
+
+        # 将数据写入CSV文件
+        for row in data:
+            writer.writerow(row)
+
+
+def rc(CsvName: str):
+    # 打开一个CSV文件用于读取
+    with open(CsvName, "r", newline='') as read_file:
+        reader = csv.reader(read_file)
+        # 读取CSV文件的所有行
+        data = [row for row in reader]
+    return data
 
 
 class data_manager:
-    def __init__(self):
+    def __init__(self,Race_Name):
         class basics:
-            def __init__(self):
-                self.class_path = "data/class"
-                self.event_path = "data/event"
-                self.match_path = "data/match"
-                self.class_data = "data/ClassData.json"
-                self.event_data = "data/EventData.json"
-                if not os.path.exists(self.class_path):
-                    os.makedirs(self.class_path)
+            def __init__(self,Race_Name):
+                self.grade_path = f"data/{Race_Name}/grade"
+                self.event_path = f"data/{Race_Name}/event"
+                self.match_path = f"data/{Race_Name}/match"
+                if not os.path.exists(self.grade_path):
+                    os.makedirs(self.grade_path)
                 if not os.path.exists(self.event_path):
                     os.makedirs(self.event_path)
                 if not os.path.exists(self.match_path):
                     os.makedirs(self.match_path)
-                if not os.path.exists(self.class_data):
-                    with open(self.class_data, 'w') as file:
-                        json.dump({}, file)
-                if not os.path.exists(self.event_data):
-                    with open(self.event_data, 'w') as file:
-                        json.dump({}, file)
 
-            def find_class_data(self):
-                with open(self.class_data, 'r') as file:
-                    data = json.load(file)
-                return data
+            ### 年级管理 ###
+            def all_grade(self):
+                folders = [f for f in os.listdir(self.grade_path) if os.path.isdir(os.path.join(self.grade_path, f))]
+                return folders
 
-            def save_class_data(self, data):
-                with open(self.class_data, 'w') as file:
-                    json.dump(data, file, indent=4)
+            @ff
+            def create_grade(self, Grade: str):
+                path = os.path.join(self.grade_path, Grade)
+                os.makedirs(path)
 
-            def create_class(self, class_name: str, grade: str):
-                path = f"{self.class_path}/{class_name}.csv"
-                headers = ["Name", "Event1", "Event2"]
-                with open(path, 'w', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=headers)
-                    writer.writeheader()  # 写入表头
-                data = self.find_class_data()
-                data[class_name] = grade
-                self.save_class_data(data)
+            @ff
+            def get_grade(self, Grade: str):
+                path = os.path.join(self.grade_path, Grade)
+                folders = [f for f in os.listdir(path) if os.path.isdir(os.path.join(path, f))]
+                return folders
 
-            def create_event(self, event_name: str, grade: str, big_event: str, type: str):
-                path1 = f"{self.event_path}/{event_name}.csv"
-                headers = ["Class", "Name", "Match", "Status", "Result", "Score"]
-                with open(path1, 'w', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=headers)
-                    writer.writeheader()  # 写入表头
-                path2 = f"{self.event_path}/{event_name}.json"
-                data = {"grade": grade, "big_event": big_event, "type": type}
-                with open(path2, 'w') as file:
-                    json.dump(data, file, indent=4)
+            @ff
+            def delete_grade(self, Grade: str):
+                path = os.path.join(self.grade_path, Grade)
+                shutil.rmtree(path)
 
-            def about_event(self,event:str):
-                path = f"{self.event_path}/{event}.json"
-                with open(path, 'r') as file:
-                    data = json.load(file)
-                return data
+            ### 班级管理 ###
+            @ff
+            def create_class(self, Grade: str, Class: str):
+                list_path = os.path.join(self.grade_path, Grade, f"{Class}.csv")
+                config_path = os.path.join(self.grade_path, Grade, f"{Class}.json")
+                wc(list_path, [])
+                wj(config_path, {"Leader": ""})
 
-            def find_class(self, class_name: str):
-                path = f"{self.class_path}/{class_name}.csv"
-                # if not os.path.exists(path):
-                #    return []
-                ClassData = []
-                with open(path, 'r', newline='') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        ClassData.append(dict(row))
-                return ClassData
+            @ff
+            def get_class_list(self, Grade: str, Class: str):
+                list_path = os.path.join(self.grade_path, Grade, f"{Class}.csv")
+                return rc(list_path)
 
-            def sava_class(self, class_name: str, data: list):
-                path = f"{self.class_path}/{class_name}.csv"
-                headers = ["Name", "Event1", "Event2"]
-                clear_data = sorted(data, key=lambda x: (x['Name'], x['Event1'], x['Event2']))
-                with open(path, 'w', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=headers)
-                    writer.writeheader()  # 写入表头
-                    writer.writerows(clear_data)  # 写入数据行
+            @ff
+            def get_class_leader(self, Grade: str, Class: str):
+                config_path = os.path.join(self.grade_path, Grade, f"{Class}.json")
+                return rc(config_path)["Leader"]
 
-            def find_event(self, event_name: str):
-                path = f"{self.event_path}/{event_name}.csv"
-                # if not os.path.exists(path):
-                #    return []
-                EventData = []
-                with open(path, 'r', newline='') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        EventData.append(dict(row))
-                return EventData
+            @ff
+            def delete_class(self, Grade: str, Class: str):
+                list_path = os.path.join(self.grade_path, Grade, f"{Class}.csv")
+                config_path = os.path.join(self.grade_path, Grade, f"{Class}.json")
+                os.remove(list_path)
+                os.remove(config_path)
 
-            def save_event(self, event_name: str, data: list):
-                path = f"{self.event_path}/{event_name}.csv"
-                headers = ["Class", "Name", "Match", "Status", "Result", "Score"]
-                clear_data = sorted(data, key=lambda x: (
-                    x['Class'], x['Name'], int(x['Match']), x['Status'], int(x['Score'])))
-                with open(path, 'w', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=headers)
-                    writer.writeheader()  # 写入表头
-                    writer.writerows(clear_data)  # 写入数据行
-
-            def find_match(self, match_name: str):
-                path = f"{self.match_path}/{match_name}.csv"
-                # if not os.path.exists(path):
-                #    return []
-                MatchData = []
-                with open(path, 'r', newline='') as csvfile:
-                    reader = csv.DictReader(csvfile)
-                    for row in reader:
-                        MatchData.append(dict(row))
-                return MatchData
-
-            def save_match(self, match_name: str, data: list):
-                up_path = f"{self.match_path}/{match_name}"
-                path = f"{up_path}/{match_name}.csv"
-                headers = ["Class", "Name", "serial number"]
-                clear_data = sorted(data, key=lambda x: x['serial number'])
-                if not os.path.exists(up_path):
-                    os.makedirs(up_path)
-                with open(path, 'w', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=headers)
-                    writer.writeheader()  # 写入表头
-                    writer.writerows(clear_data)  # 写入数据行
-
-            def all_class(self):
-                names = []
-                for root, dirs, files in os.walk(self.class_path):
-                    for file in files:
-                        if file.endswith('.csv'):
-                            names.append(os.path.splitext(file)[0])
-                return names
-
+            ### 项目管理 ###
             def all_event(self):
-                names = []
-                for root, dirs, files in os.walk(self.event_path):
-                    for file in files:
-                        if file.endswith('.csv'):
-                            names.append(os.path.splitext(file)[0])
-                return names
+                folders = [f for f in os.listdir(self.event_path) if os.path.isdir(os.path.join(self.event_path, f))]
+                return folders
 
+            @ff
+            def create_event(self, Event: str, config: dict):
+                required_keys = {'组别', 'key2'}
+                missing_keys = required_keys - set(config.keys())
+                if missing_keys:
+                    raise KeyError(f"Missing required keys in config: {missing_keys}")
+
+            ### 场次管理 ###
             def all_match(self):
                 folders = [f for f in os.listdir(self.match_path) if os.path.isdir(os.path.join(self.match_path, f))]
                 return folders
 
-        self.basics = basics()
+        self.basics = basics(Race_Name)
         ########## 基础方法完成 ##########
-        self.my_data_path = 'data/data.json'
-        if os.path.exists(self.my_data_path):
-            with open(self.my_data_path, 'r') as json_file:
-                my_data = json.load(json_file)
-            self.count_match = my_data["count_match"]
-        else:
-            self.count_match = 0
 
     def save_system_data(self):
         data = {"count_match": self.count_match}
@@ -244,7 +228,7 @@ class data_manager:
                 data["Score"] = score
         self.basics.save_event(event, event_data)
 
-    def find_student(self,event,class_name,name):
+    def find_student(self, event, class_name, name):
         event_data = self.basics.find_event(event)
         for data in event_data:
             if data["Class"] == class_name and data["Name"] == name:
@@ -252,7 +236,8 @@ class data_manager:
 
 
 def fire():
-    shutil.rmtree("data")
+    if os.path.exists("data"):
+        shutil.rmtree("data")
     time.sleep(1)
     os.makedirs("data")
 
@@ -260,25 +245,17 @@ def fire():
 if __name__ == "__main__":
     fire()
     # 学生比赛流程：报名-分配场次-检录-比赛-查询成绩
-    data_manager = data_manager()
-    # print(data_manager.basics.find_class("1"))
-    # data_manager.basics.sava_class("912",[{"Name":"JUNU","Event1":"九年级男子实心球","Event2":None}])
-    # print(data_manager.basics.find_class("912"))
-    # print(data_manager.join(912, "JUNU", "九年级男子实心球"))
-    # data_manager.check_in(912, "JUNU", "九年级男子实心球")
-    # print(data_manager.basics.find_event("九年级男子实心球"))
-
-    # for i in range(100):
-    #    data_manager.join("912", str(i), "九年级男子实心球")
-    # a = data_manager.divide_match("九年级男子实心球", 9)
-
+    data_manager = data_manager("1-某中学田径运动会（示例）")
+    data_manager.basics.create_grade("七年级")
+    data_manager.basics.create_grade("八年级")
+    data_manager.basics.create_grade("九年级")
     for i in range(701, 710 + 1):
-        data_manager.basics.create_class(str(i), "七年级")
+        data_manager.basics.create_class("七年级",i)
     for i in range(801, 812 + 1):
-        data_manager.basics.create_class(str(i), "八年级")
+        data_manager.basics.create_class("八年级",i)
     for i in range(901, 913 + 1):
-        data_manager.basics.create_class(str(i), "九年级")
-
+        data_manager.basics.create_class("九年级",i)
+    exit()
     all1 = ["5KG铅球", "10KG铅球"]
     all2 = ["100米", "400米", "800米", "1000米", "1500米", "4x100米"]
     for i in all1:
